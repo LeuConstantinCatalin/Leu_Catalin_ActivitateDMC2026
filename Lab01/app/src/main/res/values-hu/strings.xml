@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">lab1</string>
+
+    <string name="title_text">Szia, Leu</string>
+    <string name="btn_click">Nyomj meg</string>
+    <string name="edit_hint">Név</string>
+
+    <string name="bravo_text">Szép munka, Leu! %1$d</string>
+</resources>

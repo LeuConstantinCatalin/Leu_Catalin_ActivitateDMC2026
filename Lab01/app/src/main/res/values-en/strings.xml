@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">lab1</string>
+
+    <string name="title_text">Hello Leu</string>
+    <string name="btn_click">Press me</string>
+    <string name="edit_hint">Name</string>
+
+    <string name="bravo_text">Well done, Leu! %1$d</string>
+</resources>

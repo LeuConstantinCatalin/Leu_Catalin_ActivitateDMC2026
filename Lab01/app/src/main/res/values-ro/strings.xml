@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">lab1</string>
+
+    <string name="title_text">Bună Leu</string>
+    <string name="btn_click">Apasă-mă</string>
+    <string name="edit_hint">Nume</string>
+
+    <string name="bravo_text">Bravo, Leu! %1$d</string>
+</resources>

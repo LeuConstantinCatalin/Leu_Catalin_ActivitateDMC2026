@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">laborator 3</string>
+    <string name="act2_send_int_btn">Send Intent</string>
+    <string name="act3_send_res_btn">Send Result</string>
+</resources>

@@ -168,6 +168,15 @@
                 android:text="Are garantie"
                 android:textColor="@color/text_primary" />
 
+
+            <CalendarView
+                android:id="@+id/chooseWarrantyDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"/>
+
+
+
             <ToggleButton
                 android:id="@+id/toggleBluetooth"
                 android:layout_width="wrap_content"

@@ -14,6 +14,9 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 import android.widget.ToggleButton;
+import android.widget.CalendarView;
+
+import java.util.Date;
 
 public class AddCalculatorActivity extends AppCompatActivity {
 
@@ -25,6 +28,7 @@ public class AddCalculatorActivity extends AppCompatActivity {
     private Spinner spinnerBrand;
     private RatingBar ratingBar;
     private Switch switchWarranty;
+    private CalendarView cvWarrantyExpiryDate;
     private ToggleButton toggleBluetooth;
     private Button btnSave;
 
@@ -41,6 +45,8 @@ public class AddCalculatorActivity extends AppCompatActivity {
         spinnerBrand = findViewById(R.id.spinnerBrand);
         ratingBar = findViewById(R.id.ratingBar);
         switchWarranty = findViewById(R.id.switchWarranty);
+        cvWarrantyExpiryDate = findViewById(R.id.chooseWarrantyDate);
+        cvWarrantyExpiryDate.setVisibility(CalendarView.GONE);
         toggleBluetooth = findViewById(R.id.toggleBluetooth);
         btnSave = findViewById(R.id.btnSave);
 
@@ -53,6 +59,14 @@ public class AddCalculatorActivity extends AppCompatActivity {
         spinnerBrand.setAdapter(adapter);
 
         btnSave.setOnClickListener(v -> saveCalculator());
+
+        switchWarranty.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                cvWarrantyExpiryDate.setVisibility(CalendarView.VISIBLE);
+            } else {
+                cvWarrantyExpiryDate.setVisibility(CalendarView.GONE);
+            }
+        });
     }
 
     private void saveCalculator() {
@@ -90,6 +104,13 @@ public class AddCalculatorActivity extends AppCompatActivity {
             osType = "Linux";
         }
 
+        Date warrantyExpiryDate;
+        if (warranty) {
+            warrantyExpiryDate = new Date(cvWarrantyExpiryDate.getDate());
+        } else {
+            warrantyExpiryDate = new Date(0);
+        }
+
         Calculator calculator = new Calculator(
                 model,
                 gaming,
@@ -97,11 +118,10 @@ public class AddCalculatorActivity extends AppCompatActivity {
                 brand,
                 rating,
                 warranty,
+                warrantyExpiryDate,
                 bluetoothEnabled,
                 osType
         );
-
-
 
         Bundle bundle = new Bundle();
         bundle.putSerializable("calculator_object", calculator);

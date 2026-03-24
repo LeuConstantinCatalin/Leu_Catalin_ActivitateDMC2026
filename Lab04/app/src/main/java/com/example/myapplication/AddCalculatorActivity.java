@@ -4,8 +4,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -14,7 +16,6 @@ import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-import android.widget.CalendarView;
 
 import java.util.Date;
 
@@ -32,6 +33,9 @@ public class AddCalculatorActivity extends AppCompatActivity {
     private ToggleButton toggleBluetooth;
     private Button btnSave;
 
+    private boolean isEditMode = false;
+    private Calculator calculatorToEdit = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,9 +50,10 @@ public class AddCalculatorActivity extends AppCompatActivity {
         ratingBar = findViewById(R.id.ratingBar);
         switchWarranty = findViewById(R.id.switchWarranty);
         cvWarrantyExpiryDate = findViewById(R.id.chooseWarrantyDate);
-        cvWarrantyExpiryDate.setVisibility(CalendarView.GONE);
         toggleBluetooth = findViewById(R.id.toggleBluetooth);
         btnSave = findViewById(R.id.btnSave);
+
+        cvWarrantyExpiryDate.setVisibility(View.GONE);
 
         ArrayAdapter<Brand> adapter = new ArrayAdapter<>(
                 this,
@@ -58,15 +63,59 @@ public class AddCalculatorActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerBrand.setAdapter(adapter);
 
-        btnSave.setOnClickListener(v -> saveCalculator());
+        isEditMode = getIntent().getBooleanExtra("is_edit", false);
+
+        if (isEditMode) {
+            calculatorToEdit = getIntent().getParcelableExtra("calculator_object");
+            if (calculatorToEdit != null) {
+                populateFields(calculatorToEdit);
+                btnSave.setText("Modifica");
+            }
+        }
 
         switchWarranty.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-                cvWarrantyExpiryDate.setVisibility(CalendarView.VISIBLE);
+                cvWarrantyExpiryDate.setVisibility(View.VISIBLE);
             } else {
-                cvWarrantyExpiryDate.setVisibility(CalendarView.GONE);
+                cvWarrantyExpiryDate.setVisibility(View.GONE);
             }
         });
+
+        btnSave.setOnClickListener(v -> saveCalculator());
+    }
+
+    private void populateFields(Calculator calculator) {
+        etModel.setText(calculator.getModel());
+        etRam.setText(String.valueOf(calculator.getRamGb()));
+        cbGaming.setChecked(calculator.isGaming());
+
+        if ("Windows".equals(calculator.getOsType())) {
+            rbWindows.setChecked(true);
+        } else if ("Linux".equals(calculator.getOsType())) {
+            rbLinux.setChecked(true);
+        }
+
+        if (calculator.getBrand() != null) {
+            spinnerBrand.setSelection(calculator.getBrand().ordinal());
+        }
+
+        ratingBar.setRating(calculator.getRating());
+        switchWarranty.setChecked(calculator.isWarranty());
+        toggleBluetooth.setChecked(calculator.isBluetoothEnabled());
+
+        if (calculator.isWarranty()) {
+            cvWarrantyExpiryDate.setVisibility(View.VISIBLE);
+
+            if (calculator.getWarrantyExpiryDate() != null) {
+                cvWarrantyExpiryDate.setDate(
+                        calculator.getWarrantyExpiryDate().getTime(),
+                        true,
+                        true
+                );
+            }
+        } else {
+            cvWarrantyExpiryDate.setVisibility(View.GONE);
+        }
     }
 
     private void saveCalculator() {
@@ -104,33 +153,50 @@ public class AddCalculatorActivity extends AppCompatActivity {
             osType = "Linux";
         }
 
-        Date warrantyExpiryDate;
+        Date warrantyExpiryDate = null;
         if (warranty) {
             warrantyExpiryDate = new Date(cvWarrantyExpiryDate.getDate());
-        } else {
-            warrantyExpiryDate = new Date(0);
         }
 
-        Calculator calculator = new Calculator(
-                model,
-                gaming,
-                ramGb,
-                brand,
-                rating,
-                warranty,
-                warrantyExpiryDate,
-                bluetoothEnabled,
-                osType
-        );
+        Calculator calculator;
 
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("calculator_object", calculator);
+        if (isEditMode && calculatorToEdit != null) {
+            calculatorToEdit.setModel(model);
+            calculatorToEdit.setGaming(gaming);
+            calculatorToEdit.setRamGb(ramGb);
+            calculatorToEdit.setBrand(brand);
+            calculatorToEdit.setRating(rating);
+            calculatorToEdit.setWarranty(warranty);
+            calculatorToEdit.setWarrantyExpiryDate(warrantyExpiryDate);
+            calculatorToEdit.setBluetoothEnabled(bluetoothEnabled);
+            calculatorToEdit.setOsType(osType);
+
+            calculator = calculatorToEdit;
+        } else {
+            calculator = new Calculator(
+                    model,
+                    gaming,
+                    ramGb,
+                    brand,
+                    rating,
+                    warranty,
+                    warrantyExpiryDate,
+                    bluetoothEnabled,
+                    osType
+            );
+        }
 
         Intent resultIntent = new Intent();
-        resultIntent.putExtra("bundle_calculator", bundle);
+        resultIntent.putExtra("calculator_object", calculator);
 
         setResult(RESULT_OK, resultIntent);
-        Toast.makeText(this, "Obiect creat cu succes", Toast.LENGTH_SHORT).show();
+
+        if (isEditMode) {
+            Toast.makeText(this, "Obiect modificat cu succes", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "Obiect creat cu succes", Toast.LENGTH_SHORT).show();
+        }
+
         finish();
     }
 }

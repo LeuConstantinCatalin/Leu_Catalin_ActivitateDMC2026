@@ -4,8 +4,8 @@ import android.os.Bundle;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+
 import android.content.Intent;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -17,12 +17,16 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_ADD = 100;
+    private static final int REQUEST_CODE_EDIT = 200;
 
     private TextView tvTitle;
     private ListView lvCalculator;
     private Button btnAddCalculator;
+
     private List<Calculator> calculatorList;
-    private ArrayAdapter<Calculator> calculatorArrayAdapter;
+    private CalculatorAdapter calculatorAdapter;
+
+    private int selectedPosition = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,41 +38,37 @@ public class MainActivity extends AppCompatActivity {
         btnAddCalculator = findViewById(R.id.btnAddCalculator);
 
         if (savedInstanceState != null) {
-            calculatorList = (List<Calculator>) savedInstanceState.getSerializable("calculator_list");
+            calculatorList = savedInstanceState.getParcelableArrayList("calculator_list");
         }
 
         if (calculatorList == null) {
             calculatorList = new ArrayList<>();
         }
 
-        calculatorArrayAdapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_list_item_1,
-                calculatorList
-        );
-
-        lvCalculator.setAdapter(calculatorArrayAdapter);
+        calculatorAdapter = new CalculatorAdapter(this, calculatorList);
+        lvCalculator.setAdapter(calculatorAdapter);
 
         btnAddCalculator.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, AddCalculatorActivity.class);
+            intent.putExtra("is_edit", false);
             startActivityForResult(intent, REQUEST_CODE_ADD);
         });
 
         lvCalculator.setOnItemClickListener((parent, view, position, id) -> {
+            selectedPosition = position;
             Calculator calculator = calculatorList.get(position);
 
-            Toast.makeText(
-                    MainActivity.this,
-                    "Ai selectat: " + calculator.toSummary(),
-                    Toast.LENGTH_SHORT
-            ).show();
+            Intent intent = new Intent(MainActivity.this, AddCalculatorActivity.class);
+            intent.putExtra("is_edit", true);
+            intent.putExtra("calculator_object", calculator);
+            startActivityForResult(intent, REQUEST_CODE_EDIT);
         });
 
         lvCalculator.setOnItemLongClickListener((parent, view, position, id) -> {
             Calculator calculator = calculatorList.get(position);
 
             calculatorList.remove(position);
-            calculatorArrayAdapter.notifyDataSetChanged();
+            calculatorAdapter.notifyDataSetChanged();
 
             Toast.makeText(
                     MainActivity.this,
@@ -84,14 +84,34 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_CODE_ADD && resultCode == RESULT_OK && data != null) {
-            Bundle bundle = data.getBundleExtra("bundle_calculator");
-            if (bundle != null) {
-                Calculator calculator = (Calculator) bundle.getSerializable("calculator_object");
-                if (calculator != null) {
-                    calculatorList.add(calculator);
-                    calculatorArrayAdapter.notifyDataSetChanged();
-                }
+        if (resultCode != RESULT_OK || data == null) {
+            return;
+        }
+
+        Calculator calculator = data.getParcelableExtra("calculator_object");
+        if (calculator == null) {
+            return;
+        }
+
+        if (requestCode == REQUEST_CODE_ADD) {
+            calculatorList.add(calculator);
+            calculatorAdapter.notifyDataSetChanged();
+
+            Toast.makeText(
+                    this,
+                    "Ai adaugat: " + calculator.toSummary(),
+                    Toast.LENGTH_SHORT
+            ).show();
+        } else if (requestCode == REQUEST_CODE_EDIT) {
+            if (selectedPosition >= 0 && selectedPosition < calculatorList.size()) {
+                calculatorList.set(selectedPosition, calculator);
+                calculatorAdapter.notifyDataSetChanged();
+
+                Toast.makeText(
+                        this,
+                        "Ai modificat: " + calculator.toSummary(),
+                        Toast.LENGTH_SHORT
+                ).show();
             }
         }
     }
@@ -99,6 +119,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable("calculator_list", (java.io.Serializable) calculatorList);
+        outState.putParcelableArrayList("calculator_list", new ArrayList<>(calculatorList));
     }
 }

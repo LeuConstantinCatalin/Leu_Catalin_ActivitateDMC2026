@@ -1,0 +1,41 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- General -->
+    <string name="app_name">Sentinel IV</string>
+    <string name="dashboard_subtitle">Dashboard de monitorizare și control</string>
+
+    <!-- Status -->
+    <string name="status_connection">Stare conexiune: Deconectat</string>
+    <string name="status_jetson_offline">Jetson: Offline</string>
+    <string name="status_esp_offline">ESP32: Offline</string>
+
+    <!-- Buttons -->
+    <string name="btn_connect">Conectare</string>
+    <string name="btn_start_mission">Pornește misiunea</string>
+    <string name="btn_resume_last">Reia ultima misiune</string>
+
+    <!-- Mode -->
+    <string name="mode_label">Mod operare:</string>
+    <string name="mode_switch">Manual / Auto</string>
+
+    <!-- Mission -->
+    <string name="mission_none">Misiune curentă: Nicio misiune activă</string>
+    <string name="last_update" tools:ignore="TypographyDashes">Ultimul update: --:--:--</string>
+
+    <!-- Summary -->
+    <string name="live_summary">Rezumat Live</string>
+    <string name="detected_objects">Obiecte detectate: 0</string>
+    <string name="yaw">Yaw: 0°</string>
+    <string name="pitch">Pitch: 0°</string>
+    <string name="latency">Latență: 0 ms</string>
+
+    <!-- Modules -->
+    <string name="modules">Module</string>
+    <string name="video_control">Video &amp; Control</string>
+    <string name="point_cloud">Point Cloud</string>
+    <string name="telemetry">Telemetrie</string>
+    <string name="map">Hartă</string>
+    <string name="missions">Misiuni</string>
+    <string name="settings">Setări</string>
+
+</resources>

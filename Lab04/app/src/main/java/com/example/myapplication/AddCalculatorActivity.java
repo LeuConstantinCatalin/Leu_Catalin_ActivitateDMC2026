@@ -3,6 +3,8 @@ package com.example.myapplication;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -18,9 +20,10 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.util.Date;
+import java.io.FileOutputStream;
 
 public class AddCalculatorActivity extends AppCompatActivity {
-
+    private static final String FILE_NAME = "calculatoare.txt";
     private EditText etModel;
     private EditText etRam;
     private CheckBox cbGaming;
@@ -32,9 +35,19 @@ public class AddCalculatorActivity extends AppCompatActivity {
     private CalendarView cvWarrantyExpiryDate;
     private ToggleButton toggleBluetooth;
     private Button btnSave;
-
     private boolean isEditMode = false;
     private Calculator calculatorToEdit = null;
+
+    private void saveCalculatorToFile(Calculator calculator) {
+        try (FileOutputStream fos = openFileOutput(FILE_NAME, MODE_APPEND)) {
+            fos.write(calculator.toFileString().getBytes());
+        } catch (Exception e) {
+            Toast.makeText(this, "Eroare la salvarea in fisier", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+
+
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +95,34 @@ public class AddCalculatorActivity extends AppCompatActivity {
         });
 
         btnSave.setOnClickListener(v -> saveCalculator());
+        applySettings();
+    }
+
+    private void applySettings() {
+        SharedPreferences prefs = getSharedPreferences("settings_prefs", MODE_PRIVATE);
+
+        int textSize = prefs.getInt("text_size", 16);
+        String colorName = prefs.getString("text_color", "Black");
+
+        int color = Color.BLACK;
+
+        switch (colorName) {
+            case "Red":
+                color = Color.RED;
+                break;
+            case "Blue":
+                color = Color.BLUE;
+                break;
+            case "Green":
+                color = Color.GREEN;
+                break;
+        }
+
+        etModel.setTextSize(textSize);
+        etRam.setTextSize(textSize);
+
+        etModel.setTextColor(color);
+        etRam.setTextColor(color);
     }
 
     private void populateFields(Calculator calculator) {
@@ -197,6 +238,16 @@ public class AddCalculatorActivity extends AppCompatActivity {
             Toast.makeText(this, "Obiect creat cu succes", Toast.LENGTH_SHORT).show();
         }
 
+        saveCalculatorToFile(calculator);
+
         finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        View root = findViewById(android.R.id.content);
+        UiUtils.applySettingsToView(this, root);
     }
 }

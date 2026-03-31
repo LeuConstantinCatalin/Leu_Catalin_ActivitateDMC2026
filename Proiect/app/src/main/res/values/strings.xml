@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- General -->
-    <string name="app_name">Sentinel IV</string>
+    <string name="app_name">Sentinel V</string>
     <string name="dashboard_subtitle">Dashboard de monitorizare și control</string>
 
     <!-- Status -->

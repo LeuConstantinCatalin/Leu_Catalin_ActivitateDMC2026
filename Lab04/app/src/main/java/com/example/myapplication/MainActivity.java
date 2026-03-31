@@ -6,11 +6,16 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,14 +23,15 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int REQUEST_CODE_ADD = 100;
     private static final int REQUEST_CODE_EDIT = 200;
+    private static final String FILE_NAME = "calculatoare.txt";
+    private static final String FAVORITES_FILE_NAME = "favorite_calculatoare.txt";
 
     private TextView tvTitle;
     private ListView lvCalculator;
     private Button btnAddCalculator;
-
+    Button btnSettings;
     private List<Calculator> calculatorList;
     private CalculatorAdapter calculatorAdapter;
-
     private int selectedPosition = -1;
 
     @Override
@@ -43,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (calculatorList == null) {
             calculatorList = new ArrayList<>();
+            readCalculatorsFromFile();
         }
 
         calculatorAdapter = new CalculatorAdapter(this, calculatorList);
@@ -67,16 +74,22 @@ public class MainActivity extends AppCompatActivity {
         lvCalculator.setOnItemLongClickListener((parent, view, position, id) -> {
             Calculator calculator = calculatorList.get(position);
 
-            calculatorList.remove(position);
-            calculatorAdapter.notifyDataSetChanged();
+            saveFavoriteToFile(calculator);
 
             Toast.makeText(
                     MainActivity.this,
-                    "Ai sters: " + calculator.toSummary(),
+                    "Adaugat la favorite: " + calculator.toSummary(),
                     Toast.LENGTH_SHORT
             ).show();
 
             return true;
+        });
+
+        Button btnSettings = findViewById(R.id.btnSettings);
+
+        btnSettings.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+            startActivity(intent);
         });
     }
 
@@ -113,6 +126,45 @@ public class MainActivity extends AppCompatActivity {
                         Toast.LENGTH_SHORT
                 ).show();
             }
+        }
+    }
+
+    private void readCalculatorsFromFile() {
+        calculatorList.clear();
+
+        try (FileInputStream fis = openFileInput(FILE_NAME);
+             InputStreamReader isr = new InputStreamReader(fis);
+             BufferedReader br = new BufferedReader(isr)) {
+
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (!line.trim().isEmpty()) {
+                    Calculator calculator = Calculator.fromFileString(line);
+                    calculatorList.add(calculator);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void saveFavoriteToFile(Calculator calculator) {
+        try {
+            String data = calculator.toFileString();
+
+            Toast.makeText(this, "Se scrie: " + data, Toast.LENGTH_SHORT).show();
+
+            try (FileOutputStream fos = openFileOutput(FAVORITES_FILE_NAME, MODE_APPEND)) {
+                fos.write(data.getBytes());
+                fos.flush();
+            }
+
+            Toast.makeText(this, "Salvat in favorite", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            Toast.makeText(this, "Eroare: " + e.getClass().getSimpleName(), Toast.LENGTH_LONG).show();
+            e.printStackTrace();
         }
     }
 

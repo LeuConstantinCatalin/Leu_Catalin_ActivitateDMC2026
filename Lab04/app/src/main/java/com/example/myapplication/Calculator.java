@@ -151,4 +151,59 @@ public class Calculator implements Parcelable {
     public void setOsType(String osType) {
         this.osType = osType;
     }
+
+    public String toFileString() {
+        long expiryTime = warrantyExpiryDate != null ? warrantyExpiryDate.getTime() : -1;
+
+        return model + ";" +
+                ramGb + ";" +
+                gaming + ";" +
+                brand + ";" +
+                rating + ";" +
+                warranty + ";" +
+                expiryTime + ";" +
+                bluetoothEnabled + ";" +
+                osType + "\n";
+    }
+
+    public static Calculator fromFileString(String line) {
+        String[] parts = line.split(";");
+
+        String model = parts[0];
+        int ramGb = Integer.parseInt(parts[1]);
+        boolean gaming = Boolean.parseBoolean(parts[2]);
+        Brand brand = Brand.valueOf(parts[3]);
+        float rating = Float.parseFloat(parts[4]);
+        boolean warranty = Boolean.parseBoolean(parts[5]);
+
+        Date warrantyExpiryDate = null;
+        boolean bluetoothEnabled;
+        String osType;
+
+        if (parts.length == 9) {
+            long time = Long.parseLong(parts[6]);
+            if (time != -1) {
+                warrantyExpiryDate = new Date(time);
+            }
+            bluetoothEnabled = Boolean.parseBoolean(parts[7]);
+            osType = parts[8];
+        } else if (parts.length == 8) {
+            bluetoothEnabled = Boolean.parseBoolean(parts[6]);
+            osType = parts[7];
+        } else {
+            throw new IllegalArgumentException("Linie invalida: " + line);
+        }
+
+        return new Calculator(
+                model,
+                gaming,
+                ramGb,
+                brand,
+                rating,
+                warranty,
+                warrantyExpiryDate,
+                bluetoothEnabled,
+                osType
+        );
+    }
 }

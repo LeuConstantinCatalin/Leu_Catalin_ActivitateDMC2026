@@ -4,10 +4,10 @@ plugins {
     alias(libs.plugins.android.application)
 }
 
-val localProperties = Properties().apply {
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        localPropertiesFile.inputStream().use { load(it) }
+val secretsProperties = Properties().apply {
+    val secretsFile = rootProject.file("secrets.properties")
+    if (secretsFile.exists()) {
+        secretsFile.inputStream().use { load(it) }
     }
 }
 
@@ -27,7 +27,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-        val weatherApiKey = (localProperties.getProperty("WEATHER_API_KEY") ?: "").escapeForBuildConfig()
+        val weatherApiKey = (secretsProperties.getProperty("WEATHER_API_KEY") ?: "").escapeForBuildConfig()
         buildConfigField("String", "WEATHER_API_KEY", "\"$weatherApiKey\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
